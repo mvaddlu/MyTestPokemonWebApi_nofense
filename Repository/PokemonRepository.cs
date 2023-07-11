@@ -36,7 +36,12 @@ public class PokemonRepository : IPokemonRepository
 
         return Save();
     }
+    public bool DeletePokemon(Pokemon pokemon)
+    {
+        _context.Remove(pokemon);
 
+        return Save();
+    }
     public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
     {
         // Дві id мають проходити валідацію в контролері

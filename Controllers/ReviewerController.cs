@@ -131,6 +131,12 @@ public class ReviewerController : Controller
         reviewerUpdate.Id = reviewerId;
 
         var reviewerMap = _reviewerRepository.GetReviewer(reviewerId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
         reviewerMap.FirstName = reviewerUpdate.FirstName;
         reviewerMap.LastName = reviewerUpdate.LastName;
 
@@ -141,5 +147,31 @@ public class ReviewerController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+
+    [HttpDelete("{reviewerId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteOwner([FromRoute]int reviewerId)
+    {
+        if(_reviewerRepository.ReviewerExists(reviewerId) == false)
+        {
+            return NotFound();
+        }
+
+        var reviewerToDelete = _reviewerRepository.GetReviewer(reviewerId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_reviewerRepository.DeleteReviewer(reviewerToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }

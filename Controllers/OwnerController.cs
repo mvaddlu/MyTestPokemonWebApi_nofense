@@ -143,6 +143,7 @@ public class OwnerController : Controller
 
         return Ok("Successfully Created");
     }
+    
     [HttpPut("{ownerId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
@@ -171,6 +172,12 @@ public class OwnerController : Controller
         }
 
         var ownerMap = _ownerRepository.GetOwner(ownerId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+        
         ownerMap.FirstName = ownerUpdate.FirstName;
         ownerMap.LastName = ownerUpdate.LastName;
         ownerMap.Gym = ownerUpdate.Gym;
@@ -182,5 +189,30 @@ public class OwnerController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+    [HttpDelete("{ownerId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteOwner([FromRoute]int ownerId)
+    {
+        if(_ownerRepository.OwnerExists(ownerId) == false)
+        {
+            return NotFound();
+        }
+
+        var ownerToDelete = _ownerRepository.GetOwner(ownerId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_ownerRepository.DeleteOwner(ownerToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }

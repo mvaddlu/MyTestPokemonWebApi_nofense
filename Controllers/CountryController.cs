@@ -158,6 +158,11 @@ public class CountryController : Controller
         }
 
         var countryMap = _countryRepository.GetCountry(countryId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
         countryMap.Name = countryUpdate.Name;
 
         if(_countryRepository.UpdateCountry(countryMap) == false)
@@ -167,5 +172,30 @@ public class CountryController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+    [HttpDelete("{countryId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteCountry([FromRoute]int countryId)
+    {
+        if(_countryRepository.CountryExists(countryId) == false)
+        {
+            return NotFound();
+        }
+
+        var countryToDelete = _countryRepository.GetCountry(countryId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_countryRepository.DeleteCountry(countryToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }

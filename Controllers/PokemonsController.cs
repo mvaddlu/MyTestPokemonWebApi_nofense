@@ -147,6 +147,12 @@ public class PokemonsController : Controller
         pokemonUpdate.Id = pokemonId;
 
         var pokemonMap = _pokemonRepository.GetPokemon(pokemonId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
         pokemonMap.Name = pokemonUpdate.Name;
         pokemonMap.BirthDate = pokemonUpdate.BirthDate;
 
@@ -157,5 +163,31 @@ public class PokemonsController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+
+    [HttpDelete("{pokemonId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteOwner([FromRoute]int pokemonId)
+    {
+        if(_pokemonRepository.PokemonExists(pokemonId) == false)
+        {
+            return NotFound();
+        }
+
+        var pokemonToDelete = _pokemonRepository.GetPokemon(pokemonId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_pokemonRepository.DeletePokemon(pokemonToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }

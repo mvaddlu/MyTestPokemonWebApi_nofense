@@ -151,6 +151,12 @@ public class ReviewController : Controller
         reviewUpdate.Id = reviewId;
 
         var reviewMap = _reviewRepository.GetReview(reviewId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
         reviewMap.Rating = reviewUpdate.Rating;
         reviewMap.Text = reviewUpdate.Text;
         reviewMap.Title = reviewUpdate.Title;
@@ -162,5 +168,31 @@ public class ReviewController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+
+    [HttpDelete("{reviewId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteOwner([FromRoute]int reviewId)
+    {
+        if(_reviewRepository.ReviewExists(reviewId) == false)
+        {
+            return NotFound();
+        }
+
+        var reviewToDelete = _reviewRepository.GetReview(reviewId)!;
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_reviewRepository.DeleteReview(reviewToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }

@@ -158,6 +158,12 @@ public class CategoryController : Controller
         }
 
         var categoryMap = _categoryRepository.GetCategory(categoryId)!;
+
+        if(!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         categoryMap.Name = categoryUpdate.Name;
 
         if(_categoryRepository.UpdateCategory(categoryMap) == false)
@@ -167,5 +173,30 @@ public class CategoryController : Controller
         }
 
         return Ok("Successfully Updated");
+    }
+    [HttpDelete("{categoryId}")]
+    [ProducesResponseType(284)]
+    [ProducesResponseType(404)]
+    public IActionResult DeleteCategory([FromRoute]int categoryId)
+    {
+        if(_categoryRepository.CategoryExists(categoryId) == false)
+        {
+            return NotFound();
+        }
+
+        var categoryToDelete = _categoryRepository.GetCategory(categoryId);
+
+        if(ModelState.IsValid == false)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_categoryRepository.DeleteCategory(categoryToDelete) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during deletion");
+            return StatusCode(500, ModelState);
+        }
+
+        return StatusCode(284);
     }
 }
