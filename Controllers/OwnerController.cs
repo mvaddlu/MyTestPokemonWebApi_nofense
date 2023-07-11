@@ -143,4 +143,44 @@ public class OwnerController : Controller
 
         return Ok("Successfully Created");
     }
+    [HttpPut("{ownerId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdateCountry([FromRoute]int ownerId, [FromBody]OwnerDto ownerUpdate)
+    {
+        if(ownerUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_ownerRepository.OwnerExists(ownerId) == false)
+        {
+            ModelState.AddModelError("", $"Owner by id:{ownerId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        ownerUpdate.Id = ownerId;
+
+        if(_ownerRepository
+            .GetOwners()
+            .Any(o => $"{o.FirstName.Trim()} {o.LastName.Trim()} {o.Gym.Trim()}"
+            .Equals($"{ownerUpdate.FirstName.Trim()} {ownerUpdate.LastName.Trim()} {ownerUpdate.Gym.Trim()}", StringComparison.OrdinalIgnoreCase)))
+        {
+            ModelState.AddModelError("", $"Owner by params:{ownerUpdate.FirstName.Trim()} {ownerUpdate.LastName.Trim()} {ownerUpdate.Gym.Trim()} already exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var ownerMap = _ownerRepository.GetOwner(ownerId)!;
+        ownerMap.FirstName = ownerUpdate.FirstName;
+        ownerMap.LastName = ownerUpdate.LastName;
+        ownerMap.Gym = ownerUpdate.Gym;
+
+        if(_ownerRepository.UpdateOwner(ownerMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }

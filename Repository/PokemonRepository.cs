@@ -30,6 +30,13 @@ public class PokemonRepository : IPokemonRepository
         return _context.Pokemons.Where(p => p.Id == id).Count() > 0;
     }
 
+    public bool UpdatePokemon(Pokemon pokemon)
+    {
+        _context.Update(pokemon);
+
+        return Save();
+    }
+
     public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
     {
         // Дві id мають проходити валідацію в контролері

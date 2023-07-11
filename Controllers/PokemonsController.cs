@@ -127,4 +127,35 @@ public class PokemonsController : Controller
 
         return Ok("Successfully Created");
     }
+
+    [HttpPut("{pokemonId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdatePokemon([FromRoute]int pokemonId, [FromBody]PokemonDto pokemonUpdate)
+    {
+        if(pokemonUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_pokemonRepository.PokemonExists(pokemonId) == false)
+        {
+            ModelState.AddModelError("", $"Pokemon by id:{pokemonId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        pokemonUpdate.Id = pokemonId;
+
+        var pokemonMap = _pokemonRepository.GetPokemon(pokemonId)!;
+        pokemonMap.Name = pokemonUpdate.Name;
+        pokemonMap.BirthDate = pokemonUpdate.BirthDate;
+
+        if(_pokemonRepository.UpdatePokemon(pokemonMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }

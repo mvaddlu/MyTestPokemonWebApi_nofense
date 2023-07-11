@@ -111,4 +111,35 @@ public class ReviewerController : Controller
 
         return Ok("Successfully Created");
     }
+
+    [HttpPut("{reviewerId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdateReviewer([FromRoute]int reviewerId, [FromBody]ReviewerDto reviewerUpdate)
+    {
+        if(reviewerUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_reviewerRepository.ReviewerExists(reviewerId) == false)
+        {
+            ModelState.AddModelError("", $"Reviewer by id:{reviewerId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        reviewerUpdate.Id = reviewerId;
+
+        var reviewerMap = _reviewerRepository.GetReviewer(reviewerId)!;
+        reviewerMap.FirstName = reviewerUpdate.FirstName;
+        reviewerMap.LastName = reviewerUpdate.LastName;
+
+        if(_reviewerRepository.UpdateReviewer(reviewerMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }

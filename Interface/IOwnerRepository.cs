@@ -6,5 +6,6 @@ public interface IOwnerRepository
     Owner? GetOwnerOfAPokemon(int pokemonId);
     bool OwnerExists(int ownerId);
     bool CreateOwner(Owner owner);
+    bool UpdateOwner(Owner owner);
     bool Save();
 }

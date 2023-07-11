@@ -131,4 +131,36 @@ public class ReviewController : Controller
 
         return Ok("Successfully Created");
     }
+
+    [HttpPut("{reviewId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdateReview([FromRoute]int reviewId, [FromBody]ReviewDto reviewUpdate)
+    {
+        if(reviewUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_reviewRepository.ReviewExists(reviewId) == false)
+        {
+            ModelState.AddModelError("", $"Review by id:{reviewId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        reviewUpdate.Id = reviewId;
+
+        var reviewMap = _reviewRepository.GetReview(reviewId)!;
+        reviewMap.Rating = reviewUpdate.Rating;
+        reviewMap.Text = reviewUpdate.Text;
+        reviewMap.Title = reviewUpdate.Title;
+
+        if(_reviewRepository.UpdateReview(reviewMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }

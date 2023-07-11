@@ -132,4 +132,40 @@ public class CountryController : Controller
 
         return Ok("Successfully Created");
     }
+
+    [HttpPut("{countryId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdateCountry([FromRoute]int countryId, [FromBody]CountryDto countryUpdate)
+    {
+        if(countryUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_countryRepository.CountryExists(countryId) == false)
+        {
+            ModelState.AddModelError("", $"Country by id:{countryId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        countryUpdate.Id = countryId;
+
+        if(_countryRepository.GetCountries().Any(c => c.Name.Trim().Equals(countryUpdate.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            ModelState.AddModelError("", $"Country by name:{countryUpdate.Name} already exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var countryMap = _countryRepository.GetCountry(countryId)!;
+        countryMap.Name = countryUpdate.Name;
+
+        if(_countryRepository.UpdateCountry(countryMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }

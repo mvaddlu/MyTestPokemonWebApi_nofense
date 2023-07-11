@@ -6,5 +6,6 @@ public interface ICountryRepository
     ICollection<Owner>? GetOwners(int countryId);
     bool CountryExists(int countryId);
     bool CreateCountry(Country country);
+    bool UpdateCountry(Country country);
     bool Save();
 }

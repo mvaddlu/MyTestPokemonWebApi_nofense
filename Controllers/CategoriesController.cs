@@ -132,4 +132,40 @@ public class CategoryController : Controller
 
         return Ok("Successfully Created");
     }
+
+    [HttpPut("{categoryId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult UpdateCategory([FromRoute]int categoryId, [FromBody]CategoryDto categoryUpdate)
+    {
+        if(categoryUpdate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_categoryRepository.CategoryExists(categoryId) == false)
+        {
+            ModelState.AddModelError("", $"Category by id:{categoryId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+        categoryUpdate.Id = categoryId;
+
+        if(_categoryRepository.GetCategories().Any(c => c.Name.Trim().Equals(categoryUpdate.Name.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            ModelState.AddModelError("", $"Category by name:{categoryUpdate.Name} already exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var categoryMap = _categoryRepository.GetCategory(categoryId)!;
+        categoryMap.Name = categoryUpdate.Name;
+
+        if(_categoryRepository.UpdateCategory(categoryMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during updating process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Updated");
+    }
 }
