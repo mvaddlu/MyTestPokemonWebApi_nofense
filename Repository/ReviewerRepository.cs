@@ -26,4 +26,16 @@ public class ReviewerRepository : IReviewerRepository
     {
         return _context.Reviewers.Any(r => r.Id == reviewerId);
     }
+
+    public bool CreateReviewer(Reviewer reviewer)
+    {
+        reviewer.Id = 0;
+        _context.Add(reviewer);
+
+        return Save();
+    }
+    public bool Save()
+    {
+        return _context.SaveChanges() > 0;
+    }
 }

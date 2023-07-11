@@ -5,4 +5,6 @@ public interface IPokemonRepository
     Pokemon GetPokemon(string name);
     double GetPokemonRating(int id);
     bool PokemonExists(int id);
+    bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon);
+    bool Save();
 }

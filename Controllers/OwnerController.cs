@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 public class OwnerController : Controller
 {
     private readonly IOwnerRepository _ownerRepository;
+    private readonly ICountryRepository _countryRepository;
     private readonly IMapper _mapper;
-    public OwnerController(IOwnerRepository ownerRepository, IMapper mapper)
+    public OwnerController(IOwnerRepository ownerRepository, ICountryRepository countryRepository, IMapper mapper)
     {
         _ownerRepository = ownerRepository;
+        _countryRepository = countryRepository;
         _mapper = mapper;
     }
     [HttpGet("owners")]
@@ -91,5 +93,54 @@ public class OwnerController : Controller
         }
 
         return Ok(pokemons);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult CreateOwner([FromQuery]int countryId, [FromBody]OwnerDto ownerCreate, CancellationToken cancellationToken)
+    {
+        if(ownerCreate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Використовувати лише якщо 
+        //if(_OwnerRepository.OwnerExists(ownerCreate.Id))
+        //{
+        //    ModelState.AddModelError("", $"Owner by id:{ownerCreate.Id} alredy exists");
+        //    return StatusCode(422, ModelState);
+        //}
+
+        var owner = _ownerRepository
+            .GetOwners()
+            .Where(o => $"{o.FirstName} {o.LastName}".Trim()
+                .Equals($"{ownerCreate.FirstName} {ownerCreate.LastName}".Trim(), StringComparison.OrdinalIgnoreCase)
+            ).FirstOrDefault();
+
+        if(owner is not null)
+        {
+            ModelState.AddModelError("", $"Owner by name:{ownerCreate.FirstName} {ownerCreate.LastName} alredy exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var ownerMap = _mapper.Map<Owner>(ownerCreate);
+
+        if(_countryRepository.CountryExists(countryId) == false)
+        {
+            ModelState.AddModelError("", $"Country by id:{countryId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+
+        ownerMap.Country = _countryRepository.GetCountry(countryId)!;
+
+        if(_ownerRepository.CreateOwner(ownerMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during saving process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Created");
     }
 }

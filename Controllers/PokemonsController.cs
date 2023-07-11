@@ -6,10 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 public class PokemonsController : Controller
 {
     private readonly IPokemonRepository _pokemonRepository;
+    private readonly IOwnerRepository _ownerRepository;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly IMapper _mapper;
-    public PokemonsController(IPokemonRepository pokemonRepository, IMapper mapper)
+    public PokemonsController(IPokemonRepository pokemonRepository, 
+        ICategoryRepository categoryRepository, IOwnerRepository ownerRepository, IMapper mapper)
     {
         _pokemonRepository = pokemonRepository;
+        _ownerRepository = ownerRepository;
+        _categoryRepository = categoryRepository;
         _mapper = mapper;
     }
     [HttpGet("pokemons")]
@@ -80,5 +85,46 @@ public class PokemonsController : Controller
         }
 
         return Ok(rating);
+    }
+
+    [HttpPost]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult CreatePokemon([FromQuery]int ownerId, [FromQuery]int categoryId, [FromBody]PokemonDto pokemonCreate)
+    {
+        if(pokemonCreate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if(_categoryRepository.CategoryExists(categoryId) == false)
+        {
+            ModelState.AddModelError("", $"Category by id:{categoryId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+
+        if(_ownerRepository.OwnerExists(ownerId) == false)
+        {
+            ModelState.AddModelError("", $"Owner by id:{ownerId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+
+        if(_pokemonRepository.GetPokemons()
+            .Any(p => p.Name.Equals(pokemonCreate.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            ModelState.AddModelError("", $"Pokemon by name:{pokemonCreate.Name} already exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var pokemonMap = _mapper.Map<Pokemon>(pokemonCreate);
+
+        if(_pokemonRepository.CreatePokemon(ownerId, categoryId, pokemonMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during saving process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Created");
     }
 }

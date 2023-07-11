@@ -96,6 +96,7 @@ public class CategoryController : Controller
     [HttpPost]
     [ProducesResponseType(204)]
     [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
     public IActionResult CreateCategory([FromBody]CategoryDto categoryCreate)
     {
         if(categoryCreate is null)

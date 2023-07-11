@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 public class ReviewController : Controller
 {
     private readonly IReviewRepository _reviewRepository;
+    private readonly IReviewerRepository _reviewerRepository;
+    private readonly IPokemonRepository _pokemonRepository;
     private readonly IMapper _mapper;
-    public ReviewController(IReviewRepository reviewRepository, IMapper mapper)
+    public ReviewController(IReviewRepository reviewRepository, IReviewerRepository reviewerRepository, IPokemonRepository pokemonRepository, IMapper mapper)
     {
         _reviewRepository = reviewRepository;
+        _reviewerRepository = reviewerRepository;
+        _pokemonRepository = pokemonRepository;
         _mapper = mapper;
     }
     [HttpGet("{reviewId}")]
@@ -68,5 +72,63 @@ public class ReviewController : Controller
         }
 
         return Ok(reviews);
+    }
+
+
+    [HttpPost]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult CreateReview([FromQuery]int reviewerId, [FromQuery]int pokemonId, [FromBody]ReviewDto reviewCreate, CancellationToken cancellationToken)
+    {
+        if(reviewCreate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Використовувати лише якщо 
+        //if(_OwnerRepository.OwnerExists(ownerCreate.Id))
+        //{
+        //    ModelState.AddModelError("", $"Owner by id:{ownerCreate.Id} alredy exists");
+        //    return StatusCode(422, ModelState);
+        //}
+
+        var review = _reviewRepository
+            .GetReviews()
+            .Where(r => r.Title.Trim()
+                .Equals(r.Title.Trim(), StringComparison.OrdinalIgnoreCase)
+            ).FirstOrDefault();
+
+        if(review is not null)
+        {
+            ModelState.AddModelError("", $"Review by title:{review.Title} alredy exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var reviewMap = _mapper.Map<Review>(reviewCreate);
+
+        if(_reviewerRepository.ReviewerExists(reviewerId) == false)
+        {
+            ModelState.AddModelError("", $"Reviewer by id:{reviewerId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+
+        reviewMap.Reviewer = _reviewerRepository.GetReviewer(reviewerId)!;
+
+        if(_pokemonRepository.PokemonExists(pokemonId) == false)
+        {
+            ModelState.AddModelError("", $"Pokemon by id:{pokemonId} does not exists");
+            return StatusCode(422, ModelState);
+        }
+
+        reviewMap.Pokemon = _pokemonRepository.GetPokemon(pokemonId)!;
+
+        if(_reviewRepository.CreateReview(reviewMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during saving process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Created");
     }
 }

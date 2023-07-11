@@ -90,4 +90,46 @@ public class CountryController : Controller
 
         return Ok(country);
     }
+
+
+    [HttpPost]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(422)]
+    public IActionResult CreateCountry([FromBody]CountryDto countryCreate)
+    {
+        if(countryCreate is null)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Використовувати лише якщо 
+        //if(_countryRepository.CountryExists(countryCreate.Id))
+        //{
+        //    ModelState.AddModelError("", $"Country by id:{categoryCreate.Id} alredy exists");
+        //    return StatusCode(422, ModelState);
+        //}
+
+        var country = _countryRepository
+            .GetCountries()
+            .Where(c => c.Name.Trim()
+                .Equals(countryCreate.Name.Trim(), StringComparison.OrdinalIgnoreCase)
+            ).FirstOrDefault();
+
+        if(country is not null)
+        {
+            ModelState.AddModelError("", $"Country by name:{countryCreate.Name} alredy exists");
+            return StatusCode(422, ModelState);
+        }
+
+        var countryMap = _mapper.Map<Country>(countryCreate);
+
+        if(_countryRepository.CreateCountry(countryMap) == false)
+        {
+            ModelState.AddModelError("", "Something went wrong during saving process");
+            return StatusCode(500, ModelState);
+        }
+
+        return Ok("Successfully Created");
+    }
 }

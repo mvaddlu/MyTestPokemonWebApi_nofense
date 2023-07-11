@@ -4,12 +4,11 @@ public class MappingProfiles : Profile
 {
     public MappingProfiles() : base()
     {
-        CreateMap<Pokemon, PokemonDto>();
-        CreateMap<Category, CategoryDto>();
-        CreateMap<CategoryDto, Category>();
-        CreateMap<Country, CountryDto>();
-        CreateMap<Owner, OwnerDto>();
-        CreateMap<Review, ReviewDto>();
-        CreateMap<Reviewer, ReviewerDto>();
+        CreateMap<Pokemon, PokemonDto>().ReverseMap();
+        CreateMap<Category, CategoryDto>().ReverseMap();
+        CreateMap<Country, CountryDto>().ReverseMap();
+        CreateMap<Owner, OwnerDto>().ReverseMap();
+        CreateMap<Review, ReviewDto>().ReverseMap();
+        CreateMap<Reviewer, ReviewerDto>().ReverseMap();
     }
 }

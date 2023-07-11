@@ -29,4 +29,36 @@ public class PokemonRepository : IPokemonRepository
     {
         return _context.Pokemons.Where(p => p.Id == id).Count() > 0;
     }
+
+    public bool CreatePokemon(int ownerId, int categoryId, Pokemon pokemon)
+    {
+        // Дві id мають проходити валідацію в контролері
+        var pokemonOwnerEntity = _context.Owners.First(o => o.Id == ownerId);
+        var pokemonCategoryEntity = _context.Categories.First(c => c.Id == categoryId);
+        pokemon.Id = 0;
+        
+        _context.Add(new PokemonOwner()
+        {
+            //PokemonId = pokemon.Id,
+            Pokemon = pokemon,
+            //OwnerId = ownerId,
+            Owner = pokemonOwnerEntity
+        });
+        
+        _context.Add(new PokemonCategory()
+        {
+            //PokemonId = pokemon.Id,
+            Pokemon = pokemon,
+            //CategoryId = categoryId,
+            Category = pokemonCategoryEntity
+        });
+
+        _context.Add(pokemon);
+        return Save();
+    }
+    public bool Save()
+    {
+        var saveChanges = _context.SaveChanges();
+        return saveChanges > 0 ? true : false;
+    }
 }

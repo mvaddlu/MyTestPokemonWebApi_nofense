@@ -4,4 +4,6 @@ public interface IReviewRepository
     ICollection<Review> GetReviewsOnPokemon(int pokemonId);
     Review? GetReview(int reviewId);
     bool ReviewExists(int reviewId);
+    bool CreateReview(Review review);
+    bool Save();
 }

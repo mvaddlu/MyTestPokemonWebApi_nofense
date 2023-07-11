@@ -39,4 +39,15 @@ public class OwnerRepository : IOwnerRepository
     {
         return _context.Owners.Any(o => o.Id == ownerId);
     }
+    public bool CreateOwner(Owner owner)
+    {
+        owner.Id = 0; // IDENTITY_INSERT=OFF
+        _context.Add(owner);
+        return Save();
+    }
+    public bool Save()
+    {
+        var saveChanges = _context.SaveChanges();
+        return saveChanges > 0 ? true : false; 
+    }
 }
