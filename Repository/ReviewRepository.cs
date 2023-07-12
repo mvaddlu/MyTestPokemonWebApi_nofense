@@ -1,4 +1,7 @@
-public class ReviewRepository : IReviewRepository {
+namespace PokemonApi.Repositories;
+
+public class ReviewRepository : IReviewRepository 
+{
     private readonly DataContext _context;
     public ReviewRepository(DataContext context)
     {

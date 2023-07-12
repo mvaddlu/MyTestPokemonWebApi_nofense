@@ -1,3 +1,5 @@
+namespace PokemonApi.Data;
+
 public class PokemonCategory
 {
     public int PokemonId { get; set; }

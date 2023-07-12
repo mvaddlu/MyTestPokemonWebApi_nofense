@@ -1,3 +1,5 @@
+namespace PokemonApi.Data;
+
 public class Reviewer
 {
     public int Id { get; set; }

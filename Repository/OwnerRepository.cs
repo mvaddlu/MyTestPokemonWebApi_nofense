@@ -1,5 +1,7 @@
 using AutoMapper;
 
+namespace PokemonApi.Repositories;
+
 public class OwnerRepository : IOwnerRepository 
 {
     private readonly DataContext _context;

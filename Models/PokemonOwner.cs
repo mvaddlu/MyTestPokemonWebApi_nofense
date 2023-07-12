@@ -1,3 +1,5 @@
+namespace PokemonApi.Data;
+
 public class PokemonOwner
 {
     public int PokemonId { get; set; }

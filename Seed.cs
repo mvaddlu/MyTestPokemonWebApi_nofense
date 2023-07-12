@@ -1,3 +1,7 @@
+namespace PokemonApi.Data;
+
+
+
     public class Seed
     {
         private readonly DataContext dataContext;

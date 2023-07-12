@@ -1,3 +1,5 @@
+namespace PokemonApi.Data;
+
 public class ReviewDto
 {
     public int Id { get; set; }

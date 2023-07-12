@@ -1,6 +1,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
+namespace PokemonApi.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
 public class PokemonsController : Controller
@@ -110,8 +112,7 @@ public class PokemonsController : Controller
             return StatusCode(422, ModelState);
         }
 
-        if(_pokemonRepository.GetPokemons()
-            .Any(p => p.Name.Equals(pokemonCreate.Name, StringComparison.OrdinalIgnoreCase)))
+        if(_pokemonRepository.CheckIfPokemonExistByName(pokemonCreate.Name))
         {
             ModelState.AddModelError("", $"Pokemon by name:{pokemonCreate.Name} already exists");
             return StatusCode(422, ModelState);

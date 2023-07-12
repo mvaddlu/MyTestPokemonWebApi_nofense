@@ -1,3 +1,5 @@
+namespace PokemonApi.Repositories;
+
 public interface ICategoryRepository
 {
     ICollection<Category> GetCategories();

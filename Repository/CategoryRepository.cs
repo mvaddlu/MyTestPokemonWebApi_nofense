@@ -1,3 +1,5 @@
+namespace PokemonApi.Repositories;
+
 public class CategoryRepository : ICategoryRepository 
 {
     private readonly DataContext _context;

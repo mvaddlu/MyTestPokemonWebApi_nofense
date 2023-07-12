@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+namespace PokemonApi.Data;
+
 public class DataContext : DbContext
 {
     public DataContext(DbContextOptions<DataContext> options) : base(options)

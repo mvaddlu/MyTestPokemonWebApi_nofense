@@ -1,3 +1,5 @@
+namespace PokemonApi.Repositories;
+
 public class PokemonRepository : IPokemonRepository 
 {
     private readonly DataContext _context;
@@ -67,6 +69,10 @@ public class PokemonRepository : IPokemonRepository
 
         _context.Add(pokemon);
         return Save();
+    }
+    public bool CheckIfPokemonExistByName(string name)
+    {
+        return _context.Pokemons.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
     public bool Save()
     {

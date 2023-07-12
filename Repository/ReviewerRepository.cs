@@ -1,3 +1,5 @@
+namespace PokemonApi.Repositories;
+
 public class ReviewerRepository : IReviewerRepository 
 {
     private readonly DataContext _context;

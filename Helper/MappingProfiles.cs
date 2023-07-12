@@ -1,5 +1,7 @@
 using AutoMapper;
 
+namespace PokemonApi.Mapping;
+
 public class MappingProfiles : Profile
 {
     public MappingProfiles() : base()
