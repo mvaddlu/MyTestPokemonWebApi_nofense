@@ -21,7 +21,7 @@ public class PokemonsControllerTests
         _categoryRepository = A.Fake<ICategoryRepository>();
         _mapper = A.Fake<IMapper>();
 
-        //_pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+        _pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
     }
 
     [Fact]
@@ -79,5 +79,95 @@ public class PokemonsControllerTests
         result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
         #endregion
+    }
+    [Fact]
+    public void PokemonController_GetPokemonRating_ReturnOk()
+    {
+        // Arrange
+        int pokemonId = 1;
+        var pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+        double rating = 1;
+
+        A.CallTo(() => _pokemonRepository.PokemonExists(pokemonId)).Returns(true);
+        A.CallTo(() => _pokemonRepository.GetPokemonRating(pokemonId)).Returns(rating);
+        // Act
+        var result = pokemonController.GetPokemonRating(pokemonId, new CancellationToken());
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        var resultObject = (OkObjectResult)result;
+        resultObject.Value.Should().BeOfType<double>();
+        ((double)(resultObject.Value!)).Should().Be(rating);
+    }
+    [Fact]
+    public void PokemonController_UpdatePokemon_ReturnOk()
+    {
+        // Arrange
+        int pokemonId = 1;
+        var pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+
+        var pokemonUpdate = new PokemonDto()
+        {
+            Name = Guid.NewGuid().ToString()
+        };
+        var pokemon = new Pokemon()
+        {
+            Name = Guid.NewGuid().ToString()
+        };
+
+        A.CallTo(() => _pokemonRepository.PokemonExists(pokemonId)).Returns(true);
+        A.CallTo(() => _pokemonRepository.GetPokemon(pokemonId)).Returns(pokemon);
+        A.CallTo(() => _pokemonRepository.UpdatePokemon(pokemon)).Returns(true);
+        // Act
+        var result = pokemonController.UpdatePokemon(pokemonId, pokemonUpdate);
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+    }
+    [Fact]
+    public void PokemonController_DeletePokemon_ReturnObjectResult()
+    {
+        //Arrange
+        int pokemonId = 1;
+        Pokemon pokemon = new Pokemon();
+        var pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+
+        A.CallTo(() => _pokemonRepository.PokemonExists(pokemonId)).Returns(true);
+        A.CallTo(() => _pokemonRepository.GetPokemon(pokemonId)).Returns(pokemon);
+        A.CallTo(() => _pokemonRepository.DeletePokemon(pokemon)).Returns(true);
+        // Act
+        var result = pokemonController.DeletePokemon(pokemonId);
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeOfType<StatusCodeResult>();
+        ((StatusCodeResult)result).StatusCode.Should().Be(284);
+    }
+    [Fact]
+    public void PokemonController_GetPokemonByName_ReturnOk()
+    {
+        // Arrange
+        string pokemonName = "Pikachu";
+        PokemonDto pokemon  = new PokemonDto();
+        var pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+        A.CallTo(() => _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokemonName))).Returns(pokemon);
+        // Act
+        var result = pokemonController.GetPokemonByName(pokemonName, new CancellationToken());
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact]
+    public void PokemonController_GetPokemon_ReturnOk()
+    {
+        // Arrange
+        int pokemonId = 1;
+        PokemonDto pokemon  = new PokemonDto();
+        var pokemonController = new PokemonsController(_pokemonRepository, _categoryRepository, _ownerRepository, _mapper);
+        A.CallTo(() => _pokemonRepository.PokemonExists(pokemonId)).Returns(true);
+        A.CallTo(() => _mapper.Map<PokemonDto>(_pokemonRepository.GetPokemon(pokemonId))).Returns(pokemon);
+        // Act
+        var result = pokemonController.GetPokemon(pokemonId, new CancellationToken());
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeOfType<OkObjectResult>();
     }
 }
